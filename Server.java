@@ -17,13 +17,17 @@ public class Server {
     public static void main(String[] args) throws Exception {
         Files.createDirectories(DATA);
         if (!Files.exists(USERS)) Files.createFile(USERS);
-        HttpServer s = HttpServer.create(new InetSocketAddress(8080), 0);
+        
+        // Use Render's PORT environment variable if available, otherwise default to 8080
+        int port = System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 8080;
+        HttpServer s = HttpServer.create(new InetSocketAddress(port), 0);
+        
         s.createContext("/", Server::files);
         s.createContext("/api/signup", x -> auth(x, true));
         s.createContext("/api/login", x -> auth(x, false));
         s.createContext("/api/state", Server::state);
         s.start();
-        System.out.println("PADAYON running at http://localhost:8080");
+        System.out.println("PADAYON running at port " + port);
     }
 
     static synchronized void auth(HttpExchange x, boolean signup) throws IOException {
